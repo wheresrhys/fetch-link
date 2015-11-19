@@ -1,0 +1,34 @@
+{
+  "name": "fetch-all",
+  "version": "1.0.0",
+  "description": "Fetch all content by following Link headers",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wheresrhys/fetch-all.git"
+  },
+  "keywords": [
+    "fetch",
+    "link",
+    "iteration",
+    "api"
+  ],
+  "author": "Rhys Evans",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wheresrhys/fetch-all/issues"
+  },
+  "homepage": "https://github.com/wheresrhys/fetch-all#readme",
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "fetch-mock": "^2.3.0",
+    "isomorphic-fetch": "^2.2.0",
+    "mocha": "^2.3.4"
+  },
+  "dependencies": {
+    "parse-link-header": "^0.4.1"
+  }
+}
