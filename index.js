@@ -10,6 +10,7 @@ class FetchAll {
 		this.initialDirection = typeof options === 'string' && options || typeof options === 'object' && options.direction;
 		this.prevTerminated = this.initialDirection === 'next';
 		this.nextTerminated = this.initialDirection === 'prev';
+		this.failGracefully = options.failGracefully;
 		this.initialUrl = url;
 		this.promises = [];
 	}
@@ -48,15 +49,27 @@ class FetchAll {
 					return this.end();
 				}
 
-				if ((!direction || direction === 'next') && link.next) {
+				if (link.next && (direction === 'next' || !direction)) {
 					this.fetch(link.next.url, 'next');
 				}
 
-				if ((!direction || direction === 'prev') && link.prev) {
+				if (link.prev && (direction === 'prev' || !direction)) {
 					this.fetch(link.prev.url, 'prev');
 				}
 			})
-			.catch(this.reject);
+			.catch(err => {
+				if (this.failGracefully) {
+					this.promises = this.promises.map(r => {
+						if (r === request) {
+							return r.catch(err => err);
+						}
+						return r;
+					})
+					this.end();
+				} else {
+					this.reject(err);
+				}
+			});
 	}
 
 	end () {

@@ -123,4 +123,44 @@ describe('fetch all', () => {
 
 	});
 
+	it('has configuration shorthand for limit', () => {
+
+	})
+
+	it('has configuration shorthand for direction', () => {
+
+	})
+
+	it('has ability to pass in options to fetch', () => {
+
+	})
+
+	it('configure to not fail on first error', () => {
+
+		// need to make sure this does/doesn't terminate bidirectionally
+
+		fetchMock.mock([{
+			name: 'first',
+			matcher: 'http://domain.com',
+			response: {
+				body: [{id:1}, {id:2}],
+				headers: {
+					'Link': '<http://domain.com?page=2>; rel="next"'
+				}
+			}
+		}, {
+			name: 'second',
+			matcher: 'http://domain.com?page=2',
+			response: {
+				throws: new Error('An error')
+			}
+		}]);
+		return fetchAll('http://domain.com', {
+			failGracefully: true
+		})
+			.then(res => {
+				expect(res[1].message).to.equal('An error');
+			})
+	});
+
 })
