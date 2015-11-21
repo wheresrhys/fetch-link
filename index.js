@@ -59,13 +59,26 @@ class FetchAll {
 			})
 			.catch(err => {
 				if (this.failGracefully) {
-					this.promises = this.promises.map(r => {
+					let indexOfReq;
+					this.promises = this.promises.map((r, i) => {
 						if (r === request) {
+							indexOfReq = i;
 							return r.catch(err => err);
 						}
 						return r;
 					})
-					this.end();
+
+					if (indexOfReq === 0) {
+						this.prevTerminated = true;
+					}
+
+					if (indexOfReq === this.promises.length - 1) {
+						this.nextTerminated = true;
+					}
+
+					if (this.nextTerminated && this.prevTerminated) {
+						this.end();
+					}
 				} else {
 					this.reject(err);
 				}
@@ -77,8 +90,24 @@ class FetchAll {
 	}
 }
 
-function fetchAll(url, options) {
-	return new FetchAll(url, options).exec();
-}
-
-module.exports = fetchAll;
+module.exports = {
+	all: function (url, options) {
+		return new FetchAll(url, options).exec();
+	},
+	next: function (res, options) {
+		const link = parseLink(res.headers.get('Link')) || {};
+		return link.next ? fetch(link.next.url, options) : Promise.reject('No next link');
+	},
+	prev: function (res, options) {
+		const link = parseLink(res.headers.get('Link')) || {};
+		return link.prev ? fetch(link.prev.url, options) : Promise.reject('No prev link');
+	},
+	last: function (res, options) {
+		const link = parseLink(res.headers.get('Link')) || {};
+		return link.last ? fetch(link.last.url, options) : Promise.reject('No last link');
+	},
+	first: function (res, options) {
+		const link = parseLink(res.headers.get('Link')) || {};
+		return link.first ? fetch(link.first.url, options) : Promise.reject('No first link');
+	}
+};
