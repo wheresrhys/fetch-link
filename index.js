@@ -90,24 +90,28 @@ class FetchAll {
 	}
 }
 
+function extractLink (res) {
+	return parseLink(typeof res === 'string' ? res : res.headers.get('Link')) || {};
+}
+
 module.exports = {
 	all: function (url, options) {
 		return new FetchAll(url, options).exec();
 	},
 	next: function (res, options) {
-		const link = parseLink(res.headers.get('Link')) || {};
+		const link = extractLink(res);
 		return link.next ? fetch(link.next.url, options) : Promise.reject('No next link');
 	},
 	prev: function (res, options) {
-		const link = parseLink(res.headers.get('Link')) || {};
+		const link = extractLink(res);
 		return link.prev ? fetch(link.prev.url, options) : Promise.reject('No prev link');
 	},
 	last: function (res, options) {
-		const link = parseLink(res.headers.get('Link')) || {};
+		const link = extractLink(res);
 		return link.last ? fetch(link.last.url, options) : Promise.reject('No last link');
 	},
 	first: function (res, options) {
-		const link = parseLink(res.headers.get('Link')) || {};
+		const link = extractLink(res);
 		return link.first ? fetch(link.first.url, options) : Promise.reject('No first link');
 	}
 };

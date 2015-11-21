@@ -1,7 +1,7 @@
 {
-  "name": "fetch-all",
+  "name": "fetch-link",
   "version": "1.0.0",
-  "description": "Fetch all content by following Link headers",
+  "description": "Fetch related content by following Link headers",
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js"
