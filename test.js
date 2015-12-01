@@ -5,6 +5,9 @@ require('isomorphic-fetch');
 const expect = require('chai').expect;
 const fetchMock = require('fetch-mock/src/server');
 const fetchLinks = require('./index');
+const Response = require('node-fetch').Response;
+const Headers = require('node-fetch').Headers;
+const stream = require('stream');
 
 describe('fetch links', function () {
 
@@ -256,7 +259,67 @@ describe('fetch links', function () {
 		})
 	})
 
+
 	describe('non iterators', function () {
+
+		beforeEach(() => {
+			fetchMock.mock('^http://domain.com', 200)
+		});
+
+		afterEach(() => {
+			fetchMock.restore();
+		})
+
+		const header = '<http://domain.com?next>; rel="next", <http://domain.com?prev>; rel="prev", <http://domain.com?first>; rel="first", , <http://domain.com?last>; rel="last"';
+
+		function response () {
+			return new Response(new stream.Readable(), {
+				headers: new Headers({
+					Link: header
+				}),
+				status: 200
+			})
+		}
+		it('can fetch next Link from header string', function () {
+			fetchLinks.next(header, {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?next', {foo: 'bar'}])
+		});
+
+		it('can fetch prev Link from header string', function () {
+			fetchLinks.prev(header, {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?prev', {foo: 'bar'}])
+		});
+
+		it('can fetch last Link from header string', function () {
+			fetchLinks.last(header, {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?last', {foo: 'bar'}])
+		});
+
+		it('can fetch first Link from header string', function () {
+			fetchLinks.first(header, {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?first', {foo: 'bar'}])
+		});
+
+		it('can fetch next Link from response', function () {
+			fetchLinks.next(response(), {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?next', {foo: 'bar'}])
+		});
+
+		it('can fetch prev Link from response', function () {
+			fetchLinks.prev(response(), {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?prev', {foo: 'bar'}])
+		});
+
+		it('can fetch last Link from response', function () {
+			fetchLinks.last(response(), {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?last', {foo: 'bar'}])
+		});
+
+		it('can fetch first Link from response', function () {
+			fetchLinks.first(response(), {foo: 'bar'});
+			expect(fetchMock.calls().matched[0]).to.deep.equal(['http://domain.com?first', {foo: 'bar'}])
+		});
+
 		// awaiting v2.2.1 of isomorphic fetch in order to expose the Response constructor and facilitate writing the test for these
 	})
 })

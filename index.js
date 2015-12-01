@@ -100,6 +100,7 @@ module.exports = {
 	},
 	next: function (res, options) {
 		const link = extractLink(res);
+		console.log(link.next.url)
 		return link.next ? fetch(link.next.url, options) : Promise.reject('No next link');
 	},
 	prev: function (res, options) {
