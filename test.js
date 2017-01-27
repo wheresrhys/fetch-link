@@ -256,6 +256,24 @@ describe('fetch links', function () {
 						expect(fetchMock.calls('third')[0][1].method).to.equal('POST');
 					})
 			})
+
+			it('has ability to pass in different options per fetch', () => {
+				return fetchLinks.all('http://domain.com?page=1', {
+					fetch: function (url) {
+						return {
+							method: 'POST',
+							headers: {
+								page: url.split('?').pop()
+							}
+						}
+					}
+				})
+					.then(res => {
+						expect(fetchMock.calls('first')[0][1].headers.page).to.equal('page=1');
+						expect(fetchMock.calls('second')[0][1].headers.page).to.equal('page=2');
+						expect(fetchMock.calls('third')[0][1].headers.page).to.equal('page=3');
+					})
+			})
 		})
 	})
 
