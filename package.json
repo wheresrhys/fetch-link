@@ -1,6 +1,6 @@
 {
   "name": "fetch-link",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Fetch related content by following Link headers",
   "main": "index.js",
   "browser": "es5/index.js",
