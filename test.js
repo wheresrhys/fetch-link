@@ -274,6 +274,24 @@ describe('fetch links', function () {
 						expect(fetchMock.calls('third')[0][1].headers.page).to.equal('page=3');
 					})
 			})
+
+			it('has ability to pass in different options per fetch asynchronously', () => {
+				return fetchLinks.all('http://domain.com?page=1', {
+					fetch: function (url) {
+						return Promise.resolve({
+							method: 'POST',
+							headers: {
+								page: url.split('?').pop()
+							}
+						})
+					}
+				})
+					.then(res => {
+						expect(fetchMock.calls('first')[0][1].headers.page).to.equal('page=1');
+						expect(fetchMock.calls('second')[0][1].headers.page).to.equal('page=2');
+						expect(fetchMock.calls('third')[0][1].headers.page).to.equal('page=3');
+					})
+			})
 		})
 	})
 

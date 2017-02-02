@@ -24,7 +24,11 @@ class FetchAll {
 	}
 
 	fetch (url, direction) {
-		const request = fetch(url, typeof this.fetchOptions === 'function' ? this.fetchOptions(url) : this.fetchOptions)
+
+		const fetchOptions = (typeof this.fetchOptions === 'function') ? this.fetchOptions(url) : this.fetchOptions;
+		const fetchOptionsPromise = (fetchOptions && typeof fetchOptions.then === 'function') ? fetchOptions : Promise.resolve(fetchOptions);
+		const request = fetchOptionsPromise
+			.then(options => fetch(url, options))
 
 		this.promises[direction === 'next' ? 'push' : 'unshift'](request);
 
