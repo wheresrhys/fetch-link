@@ -1,6 +1,11 @@
 'use strict';
 
 const parseLink = require('parse-link-header');
+let localFetch;
+
+const getFetchFunction = function () {
+	return localFetch || fetch
+}
 
 class FetchAll {
 	constructor(url, options) {
@@ -23,12 +28,14 @@ class FetchAll {
 		})
 	}
 
+
+
 	fetch (url, direction) {
 
 		const fetchOptions = (typeof this.fetchOptions === 'function') ? this.fetchOptions(url) : this.fetchOptions;
 		const fetchOptionsPromise = (fetchOptions && typeof fetchOptions.then === 'function') ? fetchOptions : Promise.resolve(fetchOptions);
 		const request = fetchOptionsPromise
-			.then(options => fetch(url, options))
+			.then(options => getFetchFunction()(url, options))
 
 		this.promises[direction === 'next' ? 'push' : 'unshift'](request);
 
@@ -102,21 +109,24 @@ module.exports = {
 	all: function (url, options) {
 		return new FetchAll(url, options).exec();
 	},
+	setFetchImplementation: function (func) {
+		localFetch = func;
+	},
 	next: function (res, options) {
 		const link = extractLink(res);
 		console.log(link.next.url)
-		return link.next ? fetch(link.next.url, options) : Promise.reject('No next link');
+		return link.next ? getFetchFunction()(link.next.url, options) : Promise.reject('No next link');
 	},
 	prev: function (res, options) {
 		const link = extractLink(res);
-		return link.prev ? fetch(link.prev.url, options) : Promise.reject('No prev link');
+		return link.prev ? getFetchFunction()(link.prev.url, options) : Promise.reject('No prev link');
 	},
 	last: function (res, options) {
 		const link = extractLink(res);
-		return link.last ? fetch(link.last.url, options) : Promise.reject('No last link');
+		return link.last ? getFetchFunction()(link.last.url, options) : Promise.reject('No last link');
 	},
 	first: function (res, options) {
 		const link = extractLink(res);
-		return link.first ? fetch(link.first.url, options) : Promise.reject('No first link');
+		return link.first ? getFetchFunction()(link.first.url, options) : Promise.reject('No first link');
 	}
 };
